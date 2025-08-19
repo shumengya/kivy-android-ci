@@ -5,25 +5,57 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # 允许手动触发构建
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # 设置超时时间，避免构建卡死
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v3
+        with:
+          path: .buildozer_global
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+
+      - name: Cache Buildozer directory
+        uses: actions/cache@v3
+        with:
+          path: .buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
-          # 如果项目根目录就是 app，设置为 "."
           workdir: .
-          buildozer_version: stable  # 也可设为 "master" 等指定版本
+          buildozer_version: stable
+          command: android debug
+        env:
+          # 设置环境变量以提高构建稳定性
+          BUILDOZER_LOG_LEVEL: 2
+          # 调试版本配置
+          P4A_DEBUG: 1
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
+        if: success()  # 只有在构建成功时才上传
         with:
-          name: apk
+          name: android-apk-${{ github.run_number }}
           path: ${{ steps.buildozer.outputs.filename }}
+          retention-days: 30  # 保留30天
+
+      - name: Upload build logs on failure
+        uses: actions/upload-artifact@v4
+        if: failure()  # 构建失败时上传日志
+        with:
+          name: build-logs-${{ github.run_number }}
+          path: |
+            .buildozer/android/platform/build-*/logs/
+            .buildozer/android/logs/
+          retention-days: 7
