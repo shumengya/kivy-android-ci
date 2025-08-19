@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import logging
 import traceback
+import os
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -34,6 +36,8 @@ from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle, Line, Ellipse
 from kivy.logger import Logger
 from kivy.metrics import dp
+from kivy.core.text import LabelBase
+from kivy.resources import resource_add_path
 from functools import partial
 
 # 配置日志
@@ -44,6 +48,9 @@ class KivyUIDemo(App):
     def build(self):
         try:
             Logger.info("KivyUIDemo: 开始构建UI演示应用")
+            
+            # 配置中文字体支持
+            self.setup_chinese_font()
             
             # 创建主屏幕管理器
             sm = ScreenManager()
@@ -64,6 +71,43 @@ class KivyUIDemo(App):
             Logger.error(f"KivyUIDemo: 错误详情: {traceback.format_exc()}")
             return Label(text="应用启动失败，请检查日志")
     
+    def setup_chinese_font(self):
+        """配置中文字体支持"""
+        try:
+            # 尝试注册中文字体
+            # 在Android上，系统通常包含支持中文的字体
+            chinese_fonts = [
+                '/system/fonts/NotoSansCJK-Regular.ttc',  # Android系统字体
+                '/system/fonts/DroidSansFallback.ttf',    # 旧版Android字体
+                '/system/fonts/NotoSansCJK.ttc',          # 新版Android字体
+                'DroidSansFallback.ttf',                  # 相对路径
+                'NotoSansCJK-Regular.ttc'                 # 相对路径
+            ]
+            
+            font_registered = False
+            for font_path in chinese_fonts:
+                if os.path.exists(font_path):
+                    try:
+                        LabelBase.register(name='Chinese', fn_regular=font_path)
+                        Logger.info(f"KivyUIDemo: 成功注册中文字体: {font_path}")
+                        font_registered = True
+                        break
+                    except Exception as e:
+                        Logger.warning(f"KivyUIDemo: 注册字体失败 {font_path}: {str(e)}")
+                        continue
+            
+            if not font_registered:
+                Logger.warning("KivyUIDemo: 未找到合适的中文字体，将使用默认字体")
+                # 尝试使用Kivy默认字体，它在某些情况下也能显示中文
+                try:
+                    LabelBase.register(name='Chinese', fn_regular=LabelBase._default_font_paths[0])
+                    Logger.info("KivyUIDemo: 使用默认字体作为中文字体")
+                except Exception as e:
+                    Logger.error(f"KivyUIDemo: 字体配置完全失败: {str(e)}")
+                    
+        except Exception as e:
+            Logger.error(f"KivyUIDemo: 中文字体配置过程中发生错误: {str(e)}")
+    
     def create_main_screen(self):
         """创建主屏幕"""
         screen = Screen(name='main')
@@ -73,6 +117,7 @@ class KivyUIDemo(App):
         title = Label(
             text='Kivy UI 组件演示',
             font_size='24sp',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(60),
             color=(0.2, 0.6, 1, 1)
@@ -91,6 +136,7 @@ class KivyUIDemo(App):
         for text, screen_name in nav_buttons:
             btn = Button(
                 text=text,
+                font_name='Chinese',
                 size_hint_y=None,
                 height=dp(50),
                 background_color=(0.3, 0.7, 0.9, 1)
@@ -114,6 +160,7 @@ class KivyUIDemo(App):
         title = Label(
             text='基础组件演示',
             font_size='20sp',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             color=(1, 0.5, 0, 1)
@@ -131,6 +178,7 @@ class KivyUIDemo(App):
             label = Label(
                 text=text,
                 font_size=font_size,
+                font_name='Chinese',
                 color=color,
                 size_hint_y=None,
                 height=dp(40)
@@ -147,6 +195,7 @@ class KivyUIDemo(App):
         for text, color in buttons:
             btn = Button(
                 text=text,
+                font_name='Chinese',
                 background_color=color,
                 size_hint_y=None,
                 height=dp(50)
@@ -157,6 +206,7 @@ class KivyUIDemo(App):
         # 进度条
         progress_label = Label(
             text='进度条演示',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -176,6 +226,7 @@ class KivyUIDemo(App):
         # 返回按钮
         back_btn = Button(
             text='返回主页',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.5, 0.5, 0.5, 1)
@@ -196,6 +247,7 @@ class KivyUIDemo(App):
         title = Label(
             text='布局管理演示',
             font_size='20sp',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             color=(1, 0.5, 0, 1)
@@ -205,6 +257,7 @@ class KivyUIDemo(App):
         # 网格布局演示
         grid_label = Label(
             text='网格布局 (GridLayout)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -222,6 +275,7 @@ class KivyUIDemo(App):
         # 水平布局演示
         h_label = Label(
             text='水平布局 (BoxLayout)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -239,6 +293,7 @@ class KivyUIDemo(App):
         # 浮动布局演示
         float_label = Label(
             text='浮动布局 (FloatLayout)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -270,6 +325,7 @@ class KivyUIDemo(App):
         # 返回按钮
         back_btn = Button(
             text='返回主页',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.5, 0.5, 0.5, 1)
@@ -292,6 +348,7 @@ class KivyUIDemo(App):
         title = Label(
             text='输入组件演示',
             font_size='20sp',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             color=(1, 0.5, 0, 1)
@@ -301,6 +358,7 @@ class KivyUIDemo(App):
         # 文本输入
         text_label = Label(
             text='文本输入框:',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -308,6 +366,7 @@ class KivyUIDemo(App):
         
         text_input = TextInput(
             text='请输入文本...',
+            font_name='Chinese',
             multiline=False,
             size_hint_y=None,
             height=dp(40)
@@ -317,6 +376,7 @@ class KivyUIDemo(App):
         # 多行文本输入
         multiline_label = Label(
             text='多行文本输入:',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -324,6 +384,7 @@ class KivyUIDemo(App):
         
         multiline_input = TextInput(
             text='这是多行文本输入框\n可以输入多行内容',
+            font_name='Chinese',
             multiline=True,
             size_hint_y=None,
             height=dp(80)
@@ -333,6 +394,7 @@ class KivyUIDemo(App):
         # 滑块
         slider_label = Label(
             text='滑块控件:',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -340,6 +402,7 @@ class KivyUIDemo(App):
         
         self.slider_value_label = Label(
             text='值: 50',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -357,26 +420,26 @@ class KivyUIDemo(App):
         
         # 复选框
         checkbox_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(40))
-        checkbox_layout.add_widget(Label(text='复选框:'))
+        checkbox_layout.add_widget(Label(text='复选框:', font_name='Chinese'))
         
         checkbox = CheckBox(active=True, size_hint_x=None, width=dp(50))
         checkbox.bind(active=self.on_checkbox_active)
         checkbox_layout.add_widget(checkbox)
         
-        self.checkbox_label = Label(text='已选中')
+        self.checkbox_label = Label(text='已选中', font_name='Chinese')
         checkbox_layout.add_widget(self.checkbox_label)
         
         layout.add_widget(checkbox_layout)
         
         # 开关
         switch_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(40))
-        switch_layout.add_widget(Label(text='开关:'))
+        switch_layout.add_widget(Label(text='开关:', font_name='Chinese'))
         
         switch = Switch(active=False, size_hint_x=None, width=dp(80))
         switch.bind(active=self.on_switch_active)
         switch_layout.add_widget(switch)
         
-        self.switch_label = Label(text='关闭')
+        self.switch_label = Label(text='关闭', font_name='Chinese')
         switch_layout.add_widget(self.switch_label)
         
         layout.add_widget(switch_layout)
@@ -384,6 +447,7 @@ class KivyUIDemo(App):
         # 下拉选择器
         spinner_label = Label(
             text='下拉选择器:',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -391,6 +455,7 @@ class KivyUIDemo(App):
         
         spinner = Spinner(
             text='选择选项',
+            font_name='Chinese',
             values=['选项1', '选项2', '选项3', '选项4'],
             size_hint_y=None,
             height=dp(40)
@@ -400,6 +465,7 @@ class KivyUIDemo(App):
         
         self.spinner_result = Label(
             text='未选择',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -408,6 +474,7 @@ class KivyUIDemo(App):
         # 返回按钮
         back_btn = Button(
             text='返回主页',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.5, 0.5, 0.5, 1)
@@ -431,6 +498,7 @@ class KivyUIDemo(App):
         title = Label(
             text='媒体组件演示',
             font_size='20sp',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             color=(1, 0.5, 0, 1)
@@ -440,6 +508,7 @@ class KivyUIDemo(App):
         # 图像占位符（由于没有实际图片文件）
         image_label = Label(
             text='图像组件 (Image)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -448,6 +517,7 @@ class KivyUIDemo(App):
         # 创建一个带背景色的标签作为图像占位符
         image_placeholder = Label(
             text='图像占位符\n(实际应用中可加载图片)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(100),
             color=(1, 1, 1, 1)
@@ -462,6 +532,7 @@ class KivyUIDemo(App):
         # 颜色选择器
         color_label = Label(
             text='颜色选择器 (ColorPicker)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -476,6 +547,7 @@ class KivyUIDemo(App):
         
         self.color_result = Label(
             text='选择的颜色: RGB(1.0, 1.0, 1.0)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -484,6 +556,7 @@ class KivyUIDemo(App):
         # 文件选择器
         file_label = Label(
             text='文件选择器 (FileChooser)',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -498,6 +571,7 @@ class KivyUIDemo(App):
         
         self.file_result = Label(
             text='未选择文件',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(30)
         )
@@ -506,6 +580,7 @@ class KivyUIDemo(App):
         # 返回按钮
         back_btn = Button(
             text='返回主页',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.5, 0.5, 0.5, 1)
@@ -531,8 +606,8 @@ class KivyUIDemo(App):
         for i in range(3):
             item = AccordionItem(title=f'手风琴项目 {i+1}')
             content = BoxLayout(orientation='vertical', padding=dp(10))
-            content.add_widget(Label(text=f'这是手风琴项目 {i+1} 的内容'))
-            content.add_widget(Button(text=f'按钮 {i+1}', size_hint_y=None, height=dp(40)))
+            content.add_widget(Label(text=f'这是手风琴项目 {i+1} 的内容', font_name='Chinese'))
+            content.add_widget(Button(text=f'按钮 {i+1}', font_name='Chinese', size_hint_y=None, height=dp(40)))
             item.add_widget(content)
             accordion.add_widget(item)
         
@@ -547,6 +622,7 @@ class KivyUIDemo(App):
         for i, color in enumerate(colors):
             slide = Label(
                 text=f'轮播页面 {i+1}\n左右滑动切换',
+                font_name='Chinese',
                 color=(0, 0, 0, 1) if i == 3 else (1, 1, 1, 1)
             )
             with slide.canvas.before:
@@ -562,12 +638,12 @@ class KivyUIDemo(App):
         splitter = Splitter(sizable_from='right')
         
         left_panel = BoxLayout(orientation='vertical', padding=dp(10))
-        left_panel.add_widget(Label(text='左侧面板'))
-        left_panel.add_widget(Button(text='左侧按钮', size_hint_y=None, height=dp(40)))
+        left_panel.add_widget(Label(text='左侧面板', font_name='Chinese'))
+        left_panel.add_widget(Button(text='左侧按钮', font_name='Chinese', size_hint_y=None, height=dp(40)))
         
         right_panel = BoxLayout(orientation='vertical', padding=dp(10))
-        right_panel.add_widget(Label(text='右侧面板\n可拖拽分割线调整大小'))
-        right_panel.add_widget(Button(text='右侧按钮', size_hint_y=None, height=dp(40)))
+        right_panel.add_widget(Label(text='右侧面板\n可拖拽分割线调整大小', font_name='Chinese'))
+        right_panel.add_widget(Button(text='右侧按钮', font_name='Chinese', size_hint_y=None, height=dp(40)))
         
         splitter.add_widget(left_panel)
         splitter.add_widget(right_panel)
@@ -582,6 +658,7 @@ class KivyUIDemo(App):
         # 弹窗按钮
         popup_btn = Button(
             text='显示弹窗',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.8, 0.4, 0.8, 1)
@@ -592,6 +669,7 @@ class KivyUIDemo(App):
         # 模态视图按钮
         modal_btn = Button(
             text='显示模态视图',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.4, 0.8, 0.8, 1)
@@ -602,6 +680,7 @@ class KivyUIDemo(App):
         # 气泡按钮
         bubble_btn = Button(
             text='显示气泡',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.8, 0.8, 0.4, 1)
@@ -612,6 +691,7 @@ class KivyUIDemo(App):
         # 返回主页按钮
         back_btn = Button(
             text='返回主页',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.5, 0.5, 0.5, 1)
@@ -642,13 +722,13 @@ class KivyUIDemo(App):
     def show_custom_popup(self, instance):
         """显示自定义弹窗"""
         content = BoxLayout(orientation='vertical', padding=dp(10), spacing=dp(10))
-        content.add_widget(Label(text='这是一个自定义弹窗'))
-        content.add_widget(TextInput(text='可以在这里输入内容', multiline=False))
+        content.add_widget(Label(text='这是一个自定义弹窗', font_name='Chinese'))
+        content.add_widget(TextInput(text='可以在这里输入内容', font_name='Chinese', multiline=False))
         
         btn_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50))
         
-        ok_btn = Button(text='确定', background_color=(0.2, 0.8, 0.2, 1))
-        cancel_btn = Button(text='取消', background_color=(0.8, 0.2, 0.2, 1))
+        ok_btn = Button(text='确定', font_name='Chinese', background_color=(0.2, 0.8, 0.2, 1))
+        cancel_btn = Button(text='取消', font_name='Chinese', background_color=(0.8, 0.2, 0.2, 1))
         
         btn_layout.add_widget(ok_btn)
         btn_layout.add_widget(cancel_btn)
@@ -670,10 +750,11 @@ class KivyUIDemo(App):
         modal = ModalView(size_hint=(0.8, 0.6))
         
         content = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(10))
-        content.add_widget(Label(text='这是一个模态视图\n点击外部区域关闭', font_size='18sp'))
+        content.add_widget(Label(text='这是一个模态视图\n点击外部区域关闭', font_name='Chinese', font_size='18sp'))
         
         close_btn = Button(
             text='关闭',
+            font_name='Chinese',
             size_hint_y=None,
             height=dp(50),
             background_color=(0.8, 0.2, 0.2, 1)
@@ -692,9 +773,9 @@ class KivyUIDemo(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.7}
         )
         
-        bubble.add_widget(BubbleButton(text='选项1'))
-        bubble.add_widget(BubbleButton(text='选项2'))
-        bubble.add_widget(BubbleButton(text='选项3'))
+        bubble.add_widget(BubbleButton(text='选项1', font_name='Chinese'))
+        bubble.add_widget(BubbleButton(text='选项2', font_name='Chinese'))
+        bubble.add_widget(BubbleButton(text='选项3', font_name='Chinese'))
         
         self.root.current_screen.add_widget(bubble)
         
@@ -709,39 +790,45 @@ class KivyUIDemo(App):
                 self.progress_bar.value = 0
     
     def on_slider_value(self, instance, value):
-        """滑块值变化"""
+        """滑块值变化事件"""
         if hasattr(self, 'slider_value_label'):
             self.slider_value_label.text = f'值: {int(value)}'
+            self.slider_value_label.font_name = 'Chinese'
     
     def on_checkbox_active(self, instance, value):
-        """复选框状态变化"""
+        """复选框状态变化事件"""
         if hasattr(self, 'checkbox_label'):
             self.checkbox_label.text = '已选中' if value else '未选中'
+            self.checkbox_label.font_name = 'Chinese'
     
     def on_switch_active(self, instance, value):
-        """开关状态变化"""
+        """开关状态变化事件"""
         if hasattr(self, 'switch_label'):
             self.switch_label.text = '开启' if value else '关闭'
+            self.switch_label.font_name = 'Chinese'
     
     def on_spinner_select(self, instance, text):
-        """下拉选择器选择"""
+        """下拉选择器选择事件"""
         if hasattr(self, 'spinner_result'):
             self.spinner_result.text = f'选择了: {text}'
+            self.spinner_result.font_name = 'Chinese'
     
     def on_color_change(self, instance, color):
-        """颜色变化"""
+        """颜色选择器颜色变化事件"""
         if hasattr(self, 'color_result'):
             r, g, b, a = color
             self.color_result.text = f'选择的颜色: RGB({r:.2f}, {g:.2f}, {b:.2f})'
+            self.color_result.font_name = 'Chinese'
     
     def on_file_select(self, instance, selection):
-        """文件选择"""
+        """文件选择器选择事件"""
         if hasattr(self, 'file_result'):
             if selection:
-                filename = selection[0].split('\\')[-1] if '\\' in selection[0] else selection[0].split('/')[-1]
+                filename = selection[0].split('/')[-1] if '/' in selection[0] else selection[0].split('\\')[-1]
                 self.file_result.text = f'选择的文件: {filename}'
             else:
                 self.file_result.text = '未选择文件'
+            self.file_result.font_name = 'Chinese'
     
     def on_start(self):
         try:
