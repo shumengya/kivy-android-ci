@@ -104,9 +104,6 @@ android.allow_backup = True
 # android.debug_artifact = apk
 
 [buildozer]
-log_level = 2
-warn_on_root = 1
-
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 2
 
