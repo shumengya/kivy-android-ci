@@ -35,12 +35,6 @@ jobs:
           workdir: .
           buildozer_version: stable
           command: android debug
-        env:
-          # 设置环境变量以提高构建稳定性
-          BUILDOZER_LOG_LEVEL: 2
-          # 调试版本配置
-          P4A_DEBUG: 1
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -56,6 +50,7 @@ jobs:
         with:
           name: build-logs-${{ github.run_number }}
           path: |
-            .buildozer/android/platform/build-*/logs/
-            .buildozer/android/logs/
+            .buildozer/
+            *.log
+          if-no-files-found: ignore
           retention-days: 7
