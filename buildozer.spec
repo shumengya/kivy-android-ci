@@ -1,9 +1,10 @@
 [app]
-title = FirstKivyApp
-package.name = firstkivyapp
+title = Kivy UI Demo
+package.name = kivyuidemo
 package.domain = top.shumengya.kivyapp
-version = 0.1
+version = 0.2
 source.dir = .
+source.main = kivy_ui_demo.py
 source.include_exts = py,png,jpg,kv,atlas
 
 # (list) Application requirements
